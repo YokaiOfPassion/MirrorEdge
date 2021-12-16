@@ -6,12 +6,17 @@ public enum PlayerState { Idle, Running, Airborne, Falling }
 
 public class CharacterController : MonoBehaviour
 {
+    [Header("General")]
+    [SerializeField] private CapsuleCollider capsuleCollider;
+    [SerializeField] private LayerMask groundLayerMask;
+
+    [Header("Run")]
     [SerializeField, Range(1, 20)] private float movementSpeed = 10;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private KeyCode jumpKey = KeyCode.Joystick1Button0;
+
+    [Header("Jump")]
     [SerializeField, Range(1, 20)] private float jumpForce = 5;
-    [SerializeField] private CapsuleCollider capsuleCollider;
-    [SerializeField] private LayerMask groundLayerMask;
     [SerializeField, Range(0f, 1f)] private float coyoteTimeDuration = 0.5f;
 
     private bool touchingGround = true;
@@ -21,7 +26,13 @@ public class CharacterController : MonoBehaviour
 
     private bool coyoteTimeCoroutineIsCalled;
 
-    [Header("DEBUG")]
+    [Header("Climb")]
+    [SerializeField] private LayerMask climbableLayerMask;
+
+    [Header("Vault")]
+    [SerializeField, Range(1f, 3f)] private float momentumBoostMultiplier = 1.5f;
+
+    [Header("-- DEBUG --")]
     public bool checkGround;
 
     private void Start()
