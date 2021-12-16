@@ -8,6 +8,6 @@ public class ProcessJoystickInputs : MonoBehaviour
 
     void Update()
     {
-        NormalizedDirection = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical")).normalized;
+        NormalizedDirection = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetAxis("Vertical")).normalized;
     }
 }

@@ -335,14 +335,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea9b3f5acf0eac8438a90669488a7d25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSpeed: 10
-  rb: {fileID: 8849076772290994436}
-  jumpKey: 330
-  jumpForce: 5
   capsuleCollider: {fileID: 63902728902338580}
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  movementSpeed: 10
+  rb: {fileID: 8849076772290994436}
+  jumpKey: 330
+  jumpForce: 5
+  coyoteTimeDuration: 0.5
+  climbableLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  climbSpeed: 3
+  momentumBoostMultiplier: 1.5
+  checkGround: 0
 --- !u!1 &1048610596698797526
 GameObject:
   m_ObjectHideFlags: 0

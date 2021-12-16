@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PlayerState { Idle, Running, Airborne, Falling }
+public enum PlayerState { Idle, Running, Airborne, Falling, Climbing }
 
 public class CharacterController : MonoBehaviour
 {
     [Header("General")]
     [SerializeField] private CapsuleCollider capsuleCollider;
     [SerializeField] private LayerMask groundLayerMask;
+    private Vector3 direction; 
 
     [Header("Run")]
     [SerializeField, Range(1, 20)] private float movementSpeed = 10;
@@ -28,6 +29,10 @@ public class CharacterController : MonoBehaviour
 
     [Header("Climb")]
     [SerializeField] private LayerMask climbableLayerMask;
+    [SerializeField, Range(0.5f, 10)] private float climbSpeed = 3;
+    private bool canClimb;
+    public static bool isClimbing;
+    private Collider climbableCollider;
 
     [Header("Vault")]
     [SerializeField, Range(1f, 3f)] private float momentumBoostMultiplier = 1.5f;
@@ -40,13 +45,41 @@ public class CharacterController : MonoBehaviour
         currentState = PlayerState.Idle;
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        climbableCollider = other;
+        if (Mathf.Pow(2, other.gameObject.layer) == climbableLayerMask)
+        {
+            transform.position = new Vector3(climbableCollider.bounds.center.x, transform.position.y, transform.position.z); ; // align with object
+            transform.LookAt(new Vector3(climbableCollider.bounds.center.x, transform.position.y, transform.position.z + 3f));
+            canClimb = true;
+            rb.useGravity = false;
+            // SetPlayerState(PlayerState.Climbing);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (Mathf.Pow(2, other.gameObject.layer) == climbableLayerMask)
+        {
+            rb.useGravity = true;
+            // SetPlayerState(PlayerState.Idle);
+        }
+    }
+
     private void FixedUpdate()
     {
         SetPlayerState(PlayerState.Idle);
+        direction = new Vector3(ProcessJoystickInputs.NormalizedDirection.x * (canClimb ? 0f : 1f), 
+                                ProcessJoystickInputs.NormalizedDirection.y * (canClimb ? 1f : 0f), 
+                                ProcessJoystickInputs.NormalizedDirection.z * (canClimb ? 0f : 1f));
 
-        transform.Translate(ProcessJoystickInputs.NormalizedDirection * movementSpeed * Time.fixedDeltaTime, Space.Self);
+        transform.Translate(direction * (canClimb ? climbSpeed : movementSpeed) * Time.fixedDeltaTime, Space.Self);
         touchingGround = Physics.Raycast(transform.position + new Vector3(0f, 0.1f, 0f), Vector3.down, 0.2f, groundLayerMask);
         // Debug.DrawRay(transform.position, Vector3.down * 0.2f, Color.red, 3f);
+
+        canClimb = ProcessJoystickInputs.NormalizedDirection.x > 0f;
+        isClimbing = canClimb && ProcessJoystickInputs.NormalizedDirection.y > 0f;
 
         if (touchingGround)
         {
