@@ -6,10 +6,13 @@ public class ProcessJoystickInputs : MonoBehaviour
 {
     public static Vector3 NormalizedDirection { get; private set; }
     public static float turnValue { get; private set; }
+    public static bool Vaulting { get; private set; }
 
     void Update()
     {
         NormalizedDirection = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetAxis("Vertical")).normalized;
         turnValue = Input.GetAxis("Turn");
+        Vaulting = Input.GetKey(KeyCode.Joystick1Button5);
+
     }
 }

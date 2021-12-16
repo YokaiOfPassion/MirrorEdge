@@ -12,6 +12,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField, Range(0.5f, 2f)] private float turnSpeedMultiplier = 0.8f;
     private Vector3 direction;
     private float turnSpeed;
+    private Collider detectedCollider;
 
     [Header("Run")]
     [SerializeField, Range(1, 20)] private float movementSpeed = 10;
@@ -34,10 +35,13 @@ public class CharacterController : MonoBehaviour
     [SerializeField, Range(0.5f, 10)] private float climbSpeed = 3;
     private bool canClimb;
     public static bool isClimbing;
-    private Collider climbableCollider;
 
     [Header("Vault")]
+    [SerializeField] private LayerMask vaultableLayerMask;
     [SerializeField, Range(1f, 3f)] private float momentumBoostMultiplier = 1.5f;
+    [SerializeField, Range(1f, 5f)] private float boostDuration = 3f;
+    private float initialMovementSpeed;
+    private bool canVault;
 
     [Header("-- DEBUG --")]
     public bool checkGround;
@@ -45,17 +49,22 @@ public class CharacterController : MonoBehaviour
     private void Start()
     {
         currentState = PlayerState.Idle;
+        initialMovementSpeed = movementSpeed;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        climbableCollider = other;
+        detectedCollider = other;
         if (Mathf.Pow(2, other.gameObject.layer) == climbableLayerMask)
         {
             transform.forward = other.transform.forward;
             canClimb = true;
             rb.useGravity = false;
             // SetPlayerState(PlayerState.Climbing);
+        }
+        else if (Mathf.Pow(2, other.gameObject.layer) == vaultableLayerMask)
+        {
+            canVault = true;
         }
     }
 
@@ -64,6 +73,10 @@ public class CharacterController : MonoBehaviour
         if (Mathf.Pow(2, other.gameObject.layer) == climbableLayerMask)
         {
             canClimb = false;
+        }
+        else if (Mathf.Pow(2, other.gameObject.layer) == vaultableLayerMask)
+        {
+            canVault = false;
         }
     }
 
@@ -77,11 +90,17 @@ public class CharacterController : MonoBehaviour
                                 ProcessJoystickInputs.NormalizedDirection.y * (canClimb ? 1f : 0f), 
                                 ProcessJoystickInputs.NormalizedDirection.z * (canClimb ? 0f : 1f));
 
-        transform.Translate(direction * (canClimb ? climbSpeed : movementSpeed) * Time.fixedDeltaTime, Space.Self);
+        transform.Translate(direction * (canClimb ? climbSpeed : initialMovementSpeed) * Time.fixedDeltaTime, Space.Self);
         touchingGround = Physics.Raycast(transform.position + new Vector3(0f, 0.1f, 0f), Vector3.down, 0.2f, groundLayerMask);
         // Debug.DrawRay(transform.position, Vector3.down * 0.2f, Color.red, 3f);
 
         isClimbing = canClimb && ProcessJoystickInputs.NormalizedDirection.y > 0f;
+
+        if (canVault && ProcessJoystickInputs.Vaulting)
+        {
+            transform.position += new Vector3(0f, detectedCollider.bounds.extents.y * 2.25f, 0f);
+            rb.AddForce(transform.forward, ForceMode.Impulse);
+        }
 
         if (touchingGround)
         {
