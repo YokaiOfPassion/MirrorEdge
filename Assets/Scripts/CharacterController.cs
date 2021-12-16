@@ -52,7 +52,7 @@ public class CharacterController : MonoBehaviour
         climbableCollider = other;
         if (Mathf.Pow(2, other.gameObject.layer) == climbableLayerMask)
         {
-            transform.position = new Vector3(climbableCollider.bounds.center.x, transform.position.y, transform.position.z); ; // align with object
+            transform.forward = other.transform.forward;
             canClimb = true;
             rb.useGravity = false;
             // SetPlayerState(PlayerState.Climbing);
@@ -85,6 +85,8 @@ public class CharacterController : MonoBehaviour
 
         if (touchingGround)
         {
+            rb.useGravity = false;
+
             coyoteTimeIsUp = false;
             if (!canClimb)
             {
@@ -101,8 +103,11 @@ public class CharacterController : MonoBehaviour
 
             if (Input.GetKeyDown(jumpKey))
             {
+                rb.useGravity = false;
+
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                 SetPlayerState(PlayerState.Airborne);
+                StartCoroutine(nameof(GravitySetUp));
             }
         }
 
@@ -140,5 +145,11 @@ public class CharacterController : MonoBehaviour
         Debug.Log("end of coyote time");
         coyoteTimeIsUp = true;
         coyoteTimeCoroutineIsCalled = false;
+    }
+
+    private IEnumerator GravitySetUp()
+    {
+        yield return new WaitForSeconds(0.05f);
+        rb.useGravity = true;
     }
 }
