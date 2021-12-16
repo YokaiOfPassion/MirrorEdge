@@ -122,11 +122,8 @@ public class CharacterController : MonoBehaviour
 
             if (Input.GetKeyDown(jumpKey))
             {
-                rb.useGravity = false;
-
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                 SetPlayerState(PlayerState.Airborne);
-                StartCoroutine(nameof(GravitySetUp));
             }
         }
 
@@ -164,11 +161,5 @@ public class CharacterController : MonoBehaviour
         Debug.Log("end of coyote time");
         coyoteTimeIsUp = true;
         coyoteTimeCoroutineIsCalled = false;
-    }
-
-    private IEnumerator GravitySetUp()
-    {
-        yield return new WaitForSeconds(0.05f);
-        rb.useGravity = true;
     }
 }
