@@ -47,6 +47,7 @@ public class CharacterController : MonoBehaviour
 
     [Header("-- DEBUG --")]
     public bool checkGround;
+    public static Transform playerTransform;
 
     private void OnEnable()
     {
@@ -104,6 +105,7 @@ public class CharacterController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        playerTransform = transform;
         rb.angularVelocity = Vector3.zero;
 
         if (touchingGround)
