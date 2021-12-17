@@ -339,16 +339,21 @@ MonoBehaviour:
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  turnSpeedMultiplier: 0.8
   movementSpeed: 10
   rb: {fileID: 8849076772290994436}
-  jumpKey: 330
-  jumpForce: 5
+  jumpKey: 335
+  jumpForce: 8
   coyoteTimeDuration: 0.5
   climbableLayerMask:
     serializedVersion: 2
     m_Bits: 128
   climbSpeed: 3
+  vaultableLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
   momentumBoostMultiplier: 1.5
+  boostDuration: 3
   checkGround: 0
 --- !u!1 &1048610596698797526
 GameObject:

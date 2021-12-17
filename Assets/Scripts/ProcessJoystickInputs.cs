@@ -12,7 +12,7 @@ public class ProcessJoystickInputs : MonoBehaviour
     {
         NormalizedDirection = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetAxis("Vertical")).normalized;
         turnValue = Input.GetAxis("Turn");
-        Vaulting = Input.GetKey(KeyCode.Joystick1Button5);
+        Vaulting = Input.GetKey(KeyCode.Joystick1Button4);
 
     }
 }

@@ -12,11 +12,12 @@ public class CharacterController : MonoBehaviour
     private Vector3 direction;
     private float turnSpeed;
     private Collider detectedCollider;
+    private float raycastLength = 0.2f;
 
     [Header("Run")]
     [SerializeField, Range(1, 20)] private float movementSpeed = 10;
     [SerializeField] private Rigidbody rb;
-    [SerializeField] private KeyCode jumpKey = KeyCode.Joystick1Button0;
+    [SerializeField] private KeyCode jumpKey = KeyCode.Joystick1Button5;
 
     [Header("Jump")]
     [SerializeField, Range(1, 20)] private float jumpForce = 5;
@@ -37,6 +38,7 @@ public class CharacterController : MonoBehaviour
     public static bool isClimbing;
 
     [Header("Vault")]
+    [SerializeField, Range(0.1f, 1)] private float vaultForceMultiplier = 0.75f;
     [SerializeField] private LayerMask vaultableLayerMask;
     [SerializeField, Range(1f, 3f)] private float momentumBoostMultiplier = 1.5f;
     [SerializeField, Range(1f, 5f)] private float boostDuration = 3f;
@@ -45,6 +47,26 @@ public class CharacterController : MonoBehaviour
 
     [Header("-- DEBUG --")]
     public bool checkGround;
+
+    private void OnEnable()
+    {
+        PlayAnimationOnCollision.OnPlayerColliding += ModifyCoreSettings;
+
+    }
+
+    private void OnDisable()
+    {
+        PlayAnimationOnCollision.OnPlayerColliding -= ModifyCoreSettings;
+    }
+
+    public void ModifyCoreSettings(bool isFinal)
+    {
+        if (!isFinal) return;
+
+        raycastLength = 1.5f;
+        jumpForce *= 1.25f;
+        initialMovementSpeed *= 1.1f;
+    }
 
     private void Start()
     {
@@ -57,7 +79,6 @@ public class CharacterController : MonoBehaviour
         detectedCollider = other;
         if (Mathf.Pow(2, other.gameObject.layer) == climbableLayerMask)
         {
-            transform.forward = other.transform.forward;
             canClimb = true;
             rb.useGravity = false;
             SetPlayerState(PlayerState.Climbing);
@@ -83,6 +104,8 @@ public class CharacterController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        rb.angularVelocity = Vector3.zero;
+
         if (touchingGround)
         {
             canJump = currentState == PlayerState.Idle || currentState == PlayerState.Running;
@@ -108,7 +131,7 @@ public class CharacterController : MonoBehaviour
         }
 
         transform.Translate(direction * (canClimb ? climbSpeed : initialMovementSpeed) * Time.fixedDeltaTime, Space.Self);
-        touchingGround = Physics.Raycast(transform.position + new Vector3(0f, 0.1f, 0f), Vector3.down, 0.2f, groundLayerMask);
+        touchingGround = Physics.Raycast(transform.position + new Vector3(0f, 0.1f, 0f), Vector3.down, raycastLength, groundLayerMask);
         // Debug.DrawRay(transform.position, Vector3.down * 0.2f, Color.red, 3f);
 
         isClimbing = canClimb && ProcessJoystickInputs.NormalizedDirection.y > 0f;
@@ -116,7 +139,7 @@ public class CharacterController : MonoBehaviour
         if (canVault && ProcessJoystickInputs.Vaulting)
         {
             transform.position += new Vector3(0f, detectedCollider.bounds.extents.y * 2.25f, 0f);
-            rb.AddForce(transform.forward, ForceMode.Impulse);
+            rb.AddForce(transform.forward * vaultForceMultiplier, ForceMode.Impulse);
         }
 
         if (touchingGround)
@@ -153,10 +176,10 @@ public class CharacterController : MonoBehaviour
         }
 
         // DEBUG
-        if (!touchingGround && checkGround)
+        if (Input.GetKeyDown(KeyCode.Space) && checkGround)
         {
             Time.timeScale = 0f;
-            Debug.DrawRay(transform.position - new Vector3(0f, 0.1f, 0f), Vector3.down * 0.3f, Color.yellow, 3f);
+            Debug.DrawRay(transform.position - new Vector3(0f, 0.1f, 0f), Vector3.down * raycastLength, Color.yellow, 3f);
         }
     }
 
